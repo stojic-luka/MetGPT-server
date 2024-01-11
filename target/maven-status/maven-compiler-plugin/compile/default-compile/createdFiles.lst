@@ -1,0 +1,14 @@
+app\controller\ChatsController.class
+app\util\MetLogger.class
+app\App.class
+app\util\MetLogger$1.class
+app\service\ChatsService.class
+app\controller\MessageController.class
+app\model\Chats.class
+app\util\MetLoggerLevel.class
+app\model\Message.class
+app\repository\MessageRepository.class
+app\model\bodies\AiRequestBody.class
+app\service\MessageService.class
+app\repository\ChatsRepository.class
+app\service\AiService.class
