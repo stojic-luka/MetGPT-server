@@ -21,6 +21,10 @@ public class MessageService {
         return messageRepository.findAllMessagesByChat(UUID.fromString(chatId));
     }
     
+    public void addMessage(String chatId, String content) {
+        messageRepository.addMessage(UUID.fromString(chatId), content, false);
+    }
+    
     public void addMessage(String chatId, String content, boolean isBot) {
         messageRepository.addMessage(UUID.fromString(chatId), content, isBot);
     }

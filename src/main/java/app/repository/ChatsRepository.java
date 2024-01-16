@@ -33,5 +33,5 @@ public interface ChatsRepository extends JpaRepository<Chats, UUID> {
     void deleteMessagesInChat(@Param("chatId") UUID chatId);
     
     @Query("SELECT COUNT(*) FROM Chats c WHERE c.chatId = :chatId")
-    boolean chatExists(@Param("chatId") UUID chatId);
+    long chatExists(@Param("chatId") UUID chatId);
 }

@@ -37,6 +37,6 @@ public class ChatsService {
     }
     
     public boolean chatExists(String chatId) {
-        return chatRepository.chatExists(UUID.fromString(chatId));
+        return chatRepository.chatExists(UUID.fromString(chatId)) == 1;
     }
 }
