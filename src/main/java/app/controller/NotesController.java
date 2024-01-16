@@ -1,8 +1,6 @@
 package app.controller;
 
-import app.model.Note;
 import app.service.NotesService;
-import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -28,8 +26,8 @@ public class NotesController {
     )
     public ResponseEntity<Map<String, Object>> getNotes() {
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true),
-                Map.entry("notes", notesService.getNotes())
+                Map.entry("notes", notesService.getNotes()),
+                Map.entry("success", true)
         ));
     }
     

@@ -4,12 +4,12 @@ import app.exception.ChatIdNotExistException;
 import app.exception.InputValidationException;
 import app.model.Chats;
 import app.model.Message;
-import app.model.bodies.AiRequestBody;
 import app.service.AiService;
 import app.service.ChatsService;
 import app.service.MessageService;
 import java.util.Map;
 import java.util.UUID;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +43,8 @@ public class ChatController {
     )
     public ResponseEntity<Map<String, Object>> getChats() {
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true),
-                Map.entry("chats", chatsService.getChats())
+                Map.entry("chats", chatsService.getChats()),
+                Map.entry("success", true)
         ));
     }
 
@@ -57,8 +57,8 @@ public class ChatController {
         UUID chatId = chatsService.addChat(chat.getTitle());
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true),
-                Map.entry("chatId", chatId.toString())
+                Map.entry("chatId", chatId.toString()),
+                Map.entry("success", true)
         ));
     }
 
@@ -73,7 +73,7 @@ public class ChatController {
         }
 
         chatsService.updateChatTitle(chatId, chat.getTitle());
-        
+
         return ResponseEntity.ok().body(Map.ofEntries(
                 Map.entry("success", true)
         ));
@@ -88,14 +88,14 @@ public class ChatController {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
-        
+
         chatsService.deleteChat(chatId);
 
         return ResponseEntity.ok().body(Map.ofEntries(
                 Map.entry("success", true)
         ));
     }
-    
+
     @PostMapping(
             value = "/chats/{chatId}/chat",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -105,24 +105,23 @@ public class ChatController {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
-    
-        if (req.getContent()== null) {
+        if (req.getContent() == null) {
             throw new InputValidationException();
         }
 
-        messageService.addMessage(chatId, req.getContent(), false);
-        String resp = aiService.getResponse(req.getContent());
-        messageService.addMessage(chatId, resp, true);
+        messageService.addMessage(chatId, req.getContent());
+        JSONObject resp = aiService.getResponse(req.getContent());
+        messageService.addMessage(chatId, resp.getString("response"), true);
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true),
-                Map.entry("response", resp)
+                Map.entry("response", resp),
+                Map.entry("success", true)
         ));
     }
-    
+
     @GetMapping(
             value = "/chats/{chatId}/messages",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
+            consumes = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ResponseEntity<Map<String, Object>> getMessages(@PathVariable(value = "chatId") String chatId) {
         if (!chatsService.chatExists(chatId)) {
@@ -130,11 +129,11 @@ public class ChatController {
         }
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true),
-                Map.entry("messages", messageService.getMessages(chatId))
+                Map.entry("messages", messageService.getMessages(chatId)),
+                Map.entry("success", true)
         ));
     }
-    
+
     @PostMapping(
             value = "/chats/{chatId}/messages",
             consumes = {MediaType.APPLICATION_JSON_VALUE},
@@ -144,7 +143,6 @@ public class ChatController {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
-
         if (message.getContent() == null) {
             throw new InputValidationException();
         }

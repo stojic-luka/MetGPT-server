@@ -1,5 +1,6 @@
 package app.service;
 
+import org.json.JSONException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -12,17 +13,18 @@ public class AiService {
 
     private final String baseURL = "http://127.0.0.1:5000";
 
-    public String getResponse(String message) {
+    public JSONObject getResponse(String message) throws JSONException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         JSONObject query = new JSONObject();
-        query.put("name", "jon doe");
+        query.put("input", message);
         
-        HttpEntity<String> req = new HttpEntity<>(jsonQuery, headers);
+        HttpEntity<JSONObject> req = new HttpEntity<>(query, headers);
         
         RestTemplate restTemplate = new RestTemplate();
-        String resp = restTemplate.postForObject(baseURL + "/chat", req, String.class);
+        JSONObject resp = restTemplate.postForObject(baseURL + "/chat", req, JSONObject.class);
+        System.out.println(resp);
         return resp;
     }
 }
