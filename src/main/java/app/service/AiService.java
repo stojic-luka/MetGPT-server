@@ -13,18 +13,16 @@ public class AiService {
 
     private final String baseURL = "http://127.0.0.1:5000";
 
-    public JSONObject getResponse(String message) throws JSONException {
+    public String getResponse(String message) throws JSONException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
+        
         JSONObject query = new JSONObject();
         query.put("input", message);
         
-        HttpEntity<JSONObject> req = new HttpEntity<>(query, headers);
+        HttpEntity<String> req = new HttpEntity<>(query.toString(), headers);
         
         RestTemplate restTemplate = new RestTemplate();
-        JSONObject resp = restTemplate.postForObject(baseURL + "/chat", req, JSONObject.class);
-        System.out.println(resp);
-        return resp;
+        return restTemplate.postForObject(baseURL + "/chat", req, String.class);
     }
 }

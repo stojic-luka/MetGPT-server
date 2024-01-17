@@ -62,7 +62,7 @@ public class Chats {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Chat(\n");
-        sb.append(String.format("\tid: %d,\n", getChatId()));
+        sb.append(String.format("\tid: %S,\n", getChatId().toString()));
         sb.append(String.format("\ttitle: %s\n", getTitle()));
         sb.append(String.format("\tcreatedAt: %s\n)", getCreatedAt().toString()));
         return sb.toString();

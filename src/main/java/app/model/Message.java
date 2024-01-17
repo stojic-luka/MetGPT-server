@@ -32,7 +32,7 @@ public class Message {
     private UUID chatId;
     
     @Nonnull
-    private String content = null;
+    private String content = "";
     
     @Nonnull
     @Column(columnDefinition = "bit(1) default 0")

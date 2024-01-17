@@ -21,7 +21,7 @@ public class ChatsControllerHandler {
     @ExceptionHandler(InputValidationException.class)
     public ResponseEntity<Map<String, Object>> handleInputNullException(Exception e) {
         return ResponseEntity.badRequest().body(Map.ofEntries(
-                Map.entry("message", "Input message cannot be null"),
+                Map.entry("message", "Input validation"),
                 Map.entry("success", false)
         ));
     }
