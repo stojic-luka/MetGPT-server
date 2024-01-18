@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "api/v1/")
 public class ChatController {
-
     private final ChatsService chatsService;
     private final MessageService messageService;
     private final AiService aiService;
@@ -36,41 +35,59 @@ public class ChatController {
         this.aiService = aiService;
     }
 
+    /**
+     * Retrieves a list of chats.
+     *
+     * @return         	A ResponseEntity containing a Map with the "chats" key
+     *                  mapped to the list of chats, and the "success" key mapped
+     *                  to a boolean value indicating the success of the operation.
+     */
     @GetMapping(
-            value = "/chats",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> getChats() {
+        value = "/chats",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    getChats() {
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("chats", chatsService.getChats()),
-                Map.entry("success", true)
-        ));
+            Map.entry("chats", chatsService.getChats()),
+            Map.entry("success", true)));
     }
 
+    /**
+     * Adds a chat to the database.
+     *
+     * @param  chat  the chat object to be added
+     * @return       a ResponseEntity containing a map with the chatId and success status
+     */
     @PostMapping(
-            value = "/chats",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> addChat(@RequestBody Chats chat) {
+        value = "/chats",
+        consumes = {MediaType.APPLICATION_JSON_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    addChat(@RequestBody Chats chat) {
         if (chat.getTitle().isBlank()) {
             throw new InputValidationException();
         }
-        
+
         UUID chatId = chatsService.addChat(chat.getTitle());
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("chatId", chatId.toString()),
-                Map.entry("success", true)
-        ));
+            Map.entry("chatId", chatId.toString()),
+            Map.entry("success", true)));
     }
 
+    /**
+     * Updates the title of a chat.
+     *
+     * @param  chatId  the ID of the chat to update
+     * @param  chat    the updated chat object
+     * @return         the response entity with a map containing the success status
+     */
     @PutMapping(
-            value = "/chats/{chatId}",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> updateChatTitle(@PathVariable(value = "chatId") String chatId, @RequestBody Chats chat) {
+        value = "/chats/{chatId}",
+        consumes = {MediaType.APPLICATION_JSON_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    updateChatTitle(@PathVariable(value = "chatId") String chatId, @RequestBody Chats chat) {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
@@ -78,15 +95,20 @@ public class ChatController {
         chatsService.updateChatTitle(chatId, chat.getTitle());
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true)
-        ));
+            Map.entry("success", true)));
     }
 
+    /**
+     * Deletes a chat with the given chatId.
+     *
+     * @param  chatId  the ID of the chat to delete
+     * @return         a ResponseEntity containing a map with the key "success" and the value true if the chat was successfully deleted
+     */
     @DeleteMapping(
-            value = "/chats/{chatId}",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> deleteChat(@PathVariable(value = "chatId") String chatId) {
+        value = "/chats/{chatId}",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    deleteChat(@PathVariable(value = "chatId") String chatId) {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
@@ -94,54 +116,72 @@ public class ChatController {
         chatsService.deleteChat(chatId);
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true)
-        ));
+            Map.entry("success", true)));
     }
 
+    /**
+     * Adds users message to the database and after contacting AI service
+     * it adds bot message to database and returns it to user.
+     *
+     * @param  chatId    the ID of the chat
+     * @param  req       the message request
+     * @return           a ResponseEntity containing a map with the response and success flag
+     */
     @PostMapping(
-            value = "/chats/{chatId}/chat",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> chat(@PathVariable(value = "chatId") String chatId, @RequestBody Message req) {
+        value = "/chats/{chatId}/chat",
+        consumes = {MediaType.APPLICATION_JSON_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    chat(@PathVariable(value = "chatId") String chatId, @RequestBody Message req) {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
         if (req.getContent().isBlank()) {
             throw new InputValidationException();
         }
-        
+
         messageService.addMessage(chatId, req.getContent());
         String resp = aiService.getResponse(req.getContent());
         messageService.addMessage(chatId, resp, true);
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("response", resp),
-                Map.entry("success", true)
-        ));
+            Map.entry("response", resp),
+            Map.entry("success", true)));
     }
 
+    /**
+     * Retrieves the messages for a given chat ID.
+     *
+     * @param  chatId  the ID of the chat
+     * @return         a ResponseEntity containing a map of messages and a success flag
+     */
     @GetMapping(
-            value = "/chats/{chatId}/messages",
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> getMessages(@PathVariable(value = "chatId") String chatId) {
+        value = "/chats/{chatId}/messages",
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    getMessages(@PathVariable(value = "chatId") String chatId) {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("messages", messageService.getMessages(chatId)),
-                Map.entry("success", true)
-        ));
+            Map.entry("messages", messageService.getMessages(chatId)),
+            Map.entry("success", true)));
     }
 
+    /**
+     * Adds a new message to a chat.
+     *
+     * @param  chatId   the ID of the chat
+     * @param  message  the message to be added
+     * @return          the response entity containing a success indicator
+     */
     @PostMapping(
-            value = "/chats/{chatId}/messages",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
-            produces = {MediaType.APPLICATION_JSON_VALUE}
-    )
-    public ResponseEntity<Map<String, Object>> addMessage(@PathVariable(value = "chatId") String chatId, @RequestBody Message message) {
+        value = "/chats/{chatId}/messages",
+        consumes = {MediaType.APPLICATION_JSON_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>>
+    addMessage(@PathVariable(value = "chatId") String chatId, @RequestBody Message message) {
         if (!chatsService.chatExists(chatId)) {
             throw new ChatIdNotExistException();
         }
@@ -152,7 +192,6 @@ public class ChatController {
         messageService.addMessage(chatId, message.getContent(), message.isSenderBot());
 
         return ResponseEntity.ok().body(Map.ofEntries(
-                Map.entry("success", true)
-        ));
+            Map.entry("success", true)));
     }
 }
